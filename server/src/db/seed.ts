@@ -10,11 +10,7 @@ import { ensureRolesSeeded } from '../modules/roles/role.service.js';
 import { ensureWallets } from '../modules/portfolios/portfolio.service.js';
 import { getSystemConfig } from '../modules/admin/config.service.js';
 import { hashPassword } from '../lib/password.js';
-import {
-  DEMO_ACCOUNTS,
-  listDemoAccounts,
-  resolveDemoPassword,
-} from '../modules/auth/auth.service.js';
+import { DEMO_ACCOUNTS, listDemoAccounts } from '../modules/auth/auth.service.js';
 import { seedDemoContent } from './demoData.js';
 import { seedDemoTrading } from './demoTrading.js';
 import { INSTRUMENT_SEED, toProviderSymbol } from './instruments.data.js';
@@ -157,7 +153,7 @@ async function seedDemoAccounts(): Promise<mongoose.Types.ObjectId[]> {
     // Each account has its own password now, so the hash is per account.
     const account = DEMO_ACCOUNTS.find((entry) => entry.role === profile.role);
     if (!account) continue;
-    const passwordHash = await hashPassword(resolveDemoPassword(account));
+    const passwordHash = await hashPassword(account.password);
 
     // The password is reset on every seed so a rotated credential takes
     // effect, and demo accounts are pre-verified so a reviewer is never

@@ -346,24 +346,19 @@ export const DEMO_ACCOUNTS: readonly DemoAccountInfo[] = [
 ];
 
 /**
- * The password a given demo account actually uses.
+ * There is deliberately NO environment override for these passwords.
  *
- * `DEMO_PASSWORD` remains supported as a GLOBAL override, so a public deploy
- * can lock every demo account behind one rotated secret without a code
- * change. Unset - the normal case - each account keeps its own password.
+ * An earlier version honoured a DEMO_PASSWORD env var as a global override.
+ * That made two sources of truth possible: a deployment could DISPLAY the
+ * override on the sign-in screen while the database held hashes of the
+ * per-account passwords. "Use demo account" kept working (it never sends a
+ * password) while "Fill credentials" silently filled one that could not work.
  *
- * Both the seed and the sign-in screen call this, which is what stops the
- * displayed credential drifting from the stored hash.
+ * DEMO_ACCOUNTS above is now the only source. The seed hashes from it and the
+ * sign-in screen displays from it, so the two cannot drift.
  */
-export function resolveDemoPassword(account: Pick<DemoAccountInfo, 'password'>): string {
-  return env.DEMO_PASSWORD ?? account.password;
-}
-
 export function listDemoAccounts(): DemoAccountInfo[] {
-  return DEMO_ACCOUNTS.map((account) => ({
-    ...account,
-    password: resolveDemoPassword(account),
-  }));
+  return DEMO_ACCOUNTS.map((account) => ({ ...account }));
 }
 
 /**

@@ -7,7 +7,6 @@ import { User } from '../modules/users/user.model.js';
 import { Watchlist } from '../modules/watchlists/watchlist.model.js';
 import { Instrument } from '../modules/instruments/instrument.model.js';
 import { hashPassword } from '../lib/password.js';
-import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 
 /**
@@ -170,7 +169,7 @@ const EXTRA_USERS: ExtraUserSeed[] = [
 
 async function seedExtraUsers(): Promise<number> {
   // Supporting cast, not sign-in accounts: one shared throwaway password.
-  const passwordHash = await hashPassword(env.DEMO_PASSWORD ?? 'Demo$Fixture#2026');
+  const passwordHash = await hashPassword('Demo$Fixture#2026');
   const ids: mongoose.Types.ObjectId[] = [];
 
   for (const [index, profile] of EXTRA_USERS.entries()) {

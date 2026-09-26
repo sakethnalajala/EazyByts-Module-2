@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { listDemoAccounts } from '../modules/auth/auth.service.js';
-import { ERROR_CODES } from '@smd/shared';
+import { ERROR_CODES, ROLES } from '@smd/shared';
 import { createApp } from '../app.js';
 import { User } from '../modules/users/user.model.js';
 import { RefreshToken, VerificationToken } from '../modules/auth/token.model.js';
@@ -586,5 +586,45 @@ describe('demo account credentials', () => {
     const blob = JSON.stringify(listDemoAccounts());
     expect(blob).not.toContain('Demo@12345');
     expect(blob).not.toContain('smd.local');
+  });
+});
+
+describe('the displayed demo credential is the one that works', () => {
+  /*
+   * This is the regression this suite exists for.
+   *
+   * The sign-in screen shows a password and "Fill credentials" types it into
+   * the form. If the displayed value ever diverges from the stored hash, that
+   * button silently produces a login that cannot succeed - while "Use demo
+   * account" keeps working, because it never sends a password. So the two
+   * paths have to be checked against each other, not just individually.
+   */
+  it.each(ROLES)('signs in as %s using exactly what the screen displays', async (role) => {
+    await seedRoles();
+
+    const shown = listDemoAccounts().find((a) => a.role === role);
+    expect(shown).toBeDefined();
+
+    // Create the account the way the seed does: hashing the displayed password.
+    await createUser({
+      email: shown!.email,
+      role,
+      isDemo: true,
+      verified: true,
+      password: shown!.password,
+    });
+
+    const res = await request(app)
+      .post('/api/v1/auth/login')
+      .send({ email: shown!.email, password: shown!.password });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.user.role).toBe(role);
+  });
+
+  it('exposes no environment override that could desync the two', () => {
+    // A global override is what allowed the display and the hash to differ.
+    expect(process.env.DEMO_PASSWORD).toBeUndefined();
+    expect(JSON.stringify(listDemoAccounts())).not.toContain('Demo@12345');
   });
 });
