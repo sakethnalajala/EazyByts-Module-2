@@ -14,11 +14,12 @@ services:
     # Build from the repo root so npm workspaces resolve, and build the shared
     # contracts before the server that imports them.
     #
-    # `--include=dev` is load-bearing. NODE_ENV=production is set below, and
-    # npm honours it during install by setting omit=dev - which strips
-    # TypeScript (a root devDependency). Without this flag `tsc` is missing,
-    # nothing is emitted, and the service dies at startup on
-    # "Cannot find module .../server/dist/index.js".
+    # Note: this buildCommand only applies to services created from this
+    # Blueprint. A service created through the dashboard uses ITS OWN build
+    # command and ignores this file - which is why the real safety net is the
+    # `postinstall` hook in the root package.json. That runs on `npm install`
+    # whatever build command Render is configured with, so `server/dist` is
+    # produced either way.
     #
     # The final `test -f` turns a silent build failure into a failed deploy,
     # so a broken build can never reach the start command.
@@ -39,6 +40,10 @@ services:
         value: production
       - key: NODE_VERSION
         value: '22'
+      # NODE_ENV=production makes npm set omit=dev. This overrides that for
+      # the install step so build tooling is present when postinstall runs.
+      - key: NPM_CONFIG_INCLUDE
+        value: dev
       - key: LOG_LEVEL
         value: info
       # Render terminates TLS at its proxy; without this, every client IP would
