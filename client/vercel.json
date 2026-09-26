@@ -1,9 +1,20 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build:shared && npm run build --workspace @smd/client",
-  "outputDirectory": "client/dist",
+
+  "//": [
+    "This file is read when Vercel's Root Directory is set to `client`.",
+    "The repo-root vercel.json is used instead when Root Directory is blank -",
+    "Vercel only reads the one inside the configured root.",
+    "",
+    "The /api rewrite is what keeps the SPA and API same-origin. That is not",
+    "cosmetic: the refresh token lives in a SameSite=Lax httpOnly cookie, and",
+    "pointing the browser straight at the Render origin would make it a",
+    "third-party cookie that Safari and Brave drop - silently breaking",
+    "'stay signed in'. Leave VITE_API_BASE_URL unset so it keeps its /api/v1",
+    "default and travels through this rewrite."
+  ],
+
   "rewrites": [
     {
       "source": "/api/:path*",
@@ -14,6 +25,7 @@
       "destination": "/index.html"
     }
   ],
+
   "headers": [
     {
       "source": "/assets/(.*)",

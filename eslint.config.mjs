@@ -22,6 +22,9 @@ export default tseslint.config(
       '**/*.config.js',
       '**/*.config.mjs',
       '**/*.config.ts',
+      // Plain Node build scripts. They belong to no tsconfig, so the
+      // type-aware project service cannot parse them.
+      'scripts/**',
     ],
   },
 

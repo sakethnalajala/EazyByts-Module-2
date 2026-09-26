@@ -14,7 +14,7 @@
   "scripts": {
     "build:shared": "npm run build --workspace shared",
     "build:server": "npm run build --workspace @smd/server",
-    "postinstall": "npm run build:shared && npm run build:server",
+    "postinstall": "node scripts/postinstall.mjs",
     "dev": "npm run build:shared && concurrently -n server,client -c cyan,magenta \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "npm run dev --workspace server",
     "dev:client": "npm run dev --workspace client",
