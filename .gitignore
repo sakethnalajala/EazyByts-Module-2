@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Secrets. The wildcard is deliberate: `.env` and `.env.local` alone left
+# `.env.production`, `.env.staging` and any `.env.backup` committable.
+# `.env.example` is the one file that must be tracked - it holds placeholders.
+.env
+.env.*
+!.env.example
+
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.vercel
+.turbo

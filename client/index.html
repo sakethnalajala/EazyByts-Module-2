@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="description"
+      content="Stock Market Dashboard - a simulated paper-trading platform for Indian and US equity markets. No real money is involved."
+    />
+    <title>Stock Market Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      /*
+       * Applies the saved theme before first paint. Without this the page
+       * renders in the default theme for a frame and then snaps to the user's
+       * choice - the classic flash of wrong theme. Kept inline and tiny on
+       * purpose; the React hook adopts whatever this decides.
+       */
+      (function () {
+        try {
+          var stored = localStorage.getItem('smd.theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+          document.documentElement.style.colorScheme = theme;
+        } catch (e) {
+          /* Blocked storage: fall through to the default class on <html>. */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      This application requires JavaScript. Please enable it to continue.
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

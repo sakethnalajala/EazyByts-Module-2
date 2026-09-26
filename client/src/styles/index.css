@@ -1,0 +1,779 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens.
+ *
+ * Tailwind v4 is CSS-first, so the palette lives here rather than in a JS
+ * config. The names follow the shadcn/ui convention.
+ *
+ * Three rules this file exists to enforce:
+ *   1. Every colour is declared for BOTH themes. No hardcoded hex in components.
+ *   2. Profit/loss have dedicated tokens that clear 4.5:1 against their own
+ *      surface in both themes. Colour alone never encodes direction in the UI -
+ *      components pair these with an arrow and a sign for colour-blind users.
+ *   3. Each role gets its own accent identity (see [data-role] below) while
+ *      sharing one design system.
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(0.9 0.032 296);
+  --foreground: oklch(0.19 0.024 292);
+
+  --card: oklch(0.985 0.008 296);
+  --card-foreground: oklch(0.2 0.022 292);
+
+  --popover: oklch(0.985 0.008 296);
+  --popover-foreground: oklch(0.2 0.022 292);
+
+  --primary: oklch(0.52 0.19 295);
+  --primary-foreground: oklch(0.99 0.002 295);
+
+  --secondary: oklch(0.88 0.034 296);
+  --secondary-foreground: oklch(0.27 0.025 292);
+
+  --muted: oklch(0.88 0.034 296);
+  --muted-foreground: oklch(0.47 0.03 292);
+
+  --accent: oklch(0.89 0.04 297);
+  --accent-foreground: oklch(0.27 0.025 292);
+
+  --destructive: oklch(0.55 0.21 25);
+  --destructive-foreground: oklch(0.99 0.002 250);
+
+  --border: oklch(0.81 0.038 296);
+  --input: oklch(0.81 0.038 296);
+  --ring: oklch(0.52 0.19 295);
+
+  /* Financial semantics */
+  --profit: oklch(0.52 0.14 158);
+  --profit-foreground: oklch(0.99 0.002 250);
+  --profit-muted: oklch(0.94 0.04 158);
+  --loss: oklch(0.55 0.2 22);
+  --loss-foreground: oklch(0.99 0.002 250);
+  --loss-muted: oklch(0.95 0.04 22);
+  --neutral: oklch(0.52 0.015 260);
+
+  /* Non-live data warning (delayed / simulated feeds) */
+  --stale: oklch(0.58 0.13 75);
+  --stale-muted: oklch(0.95 0.05 85);
+
+  /*
+   * Role accents. Overridden per role by [data-role] below, so a single
+   * component can pick up the right identity without branching in JSX.
+   */
+  /* Light theme keeps the same violet identity, darkened for contrast on white. */
+  --role-accent: oklch(0.52 0.19 295);
+  --role-accent-2: oklch(0.58 0.17 305);
+  --role-glow: oklch(0.55 0.2 298 / 0.28);
+  --role-gold: oklch(0.66 0.12 82);
+
+  /*
+   * Ambient background stops, consumed by <AmbientBackground>.
+   *
+   * Light theme: a violet-tinted page, not a white one. Earlier values were
+   * so pale the whole layer stack read as plain white. These are deep enough
+   * that the purple identity carries in light mode too, while the centre stays
+   * light enough for dark body text to clear contrast comfortably.
+   */
+  --bg-deep: oklch(0.87 0.042 294);
+  --bg-mid: oklch(0.79 0.082 298);
+  --bg-halo: oklch(0.63 0.165 299);
+  --bg-halo-2: oklch(0.69 0.15 306);
+
+  /* Glass surfaces. Light theme keeps them near-white and subtle. */
+  --glass-bg: oklch(0.995 0.004 296 / 0.78);
+  --glass-border: oklch(0.8 0.05 296 / 0.8);
+  --glass-highlight: oklch(1 0 0 / 0.65);
+}
+
+.dark {
+  /*
+   * Near-black with a violet cast rather than neutral grey. This is what makes
+   * the dark theme read as "premium fintech" instead of "grey dashboard".
+   *
+   * Deliberately deeper than a typical dark theme: the ambient gradients are
+   * what supply the colour, so the base has to stay near-black or the orbs
+   * have nothing to glow against.
+   */
+  --background: oklch(0.095 0.017 290);
+  --foreground: oklch(0.97 0.004 250);
+
+  --card: oklch(0.155 0.026 290);
+  --card-foreground: oklch(0.97 0.004 250);
+
+  --popover: oklch(0.15 0.026 290);
+  --popover-foreground: oklch(0.97 0.004 250);
+
+  /*
+   * Background gradient stops. Each role overrides these, which is what gives
+   * the three areas genuinely different atmospheres rather than just different
+   * accent colours.
+   *
+   * Deep black -> dark violet -> deep black. Both halos sit in the violet
+   * band (290-302) rather than one drifting toward indigo, which is what
+   * keeps the homepage reading as two colours blended instead of three.
+   */
+  --bg-deep: oklch(0.055 0.012 292);
+  --bg-mid: oklch(0.185 0.078 296);
+  --bg-halo: oklch(0.355 0.15 298);
+  --bg-halo-2: oklch(0.3 0.125 304);
+
+  --primary: oklch(0.66 0.2 295);
+  --primary-foreground: oklch(0.12 0.018 292);
+
+  --secondary: oklch(0.26 0.025 285);
+  --secondary-foreground: oklch(0.96 0.004 250);
+
+  --muted: oklch(0.26 0.025 285);
+  --muted-foreground: oklch(0.72 0.02 280);
+
+  --accent: oklch(0.3 0.03 285);
+  --accent-foreground: oklch(0.96 0.004 250);
+
+  --destructive: oklch(0.68 0.19 25);
+  --destructive-foreground: oklch(0.145 0.018 285);
+
+  --border: oklch(0.29 0.032 292);
+  --input: oklch(0.31 0.034 292);
+  --ring: oklch(0.66 0.2 295);
+
+  --profit: oklch(0.78 0.16 158);
+  --profit-foreground: oklch(0.15 0.015 260);
+  --profit-muted: oklch(0.28 0.05 158);
+  --loss: oklch(0.72 0.17 22);
+  --loss-foreground: oklch(0.15 0.015 260);
+  --loss-muted: oklch(0.3 0.06 22);
+  --neutral: oklch(0.72 0.02 280);
+
+  --stale: oklch(0.8 0.13 85);
+  --stale-muted: oklch(0.3 0.05 85);
+
+  /*
+   * Default (signed-out) identity: violet only, no blue. The homepage is the
+   * product's front door and is specified as black + dark violet, so the
+   * unbranded accents stay inside the violet family. Signed-in roles override
+   * these below.
+   */
+  --role-accent: oklch(0.64 0.21 295);
+  --role-accent-2: oklch(0.72 0.17 305);
+  --role-glow: oklch(0.58 0.26 298 / 0.45);
+
+  --glass-bg: oklch(0.19 0.028 288 / 0.55);
+  --glass-border: oklch(0.6 0.07 292 / 0.3);
+  --glass-highlight: oklch(0.8 0.11 292 / 0.16);
+}
+
+/* ------------------------------------------------------------ role themes */
+
+/*
+ * Applied to <html data-role="..."> so every surface picks up the identity of
+ * whoever is signed in. Deliberately only shifts ACCENTS - the layout, spacing
+ * and semantics stay identical, so it reads as one application.
+ */
+
+/* Trader: blue + cyan. */
+[data-role='trader'] {
+  --role-accent: oklch(0.62 0.17 245);
+  --role-accent-2: oklch(0.72 0.14 205);
+  --role-glow: oklch(0.6 0.2 240 / 0.4);
+}
+.dark[data-role='trader'] {
+  --primary: oklch(0.66 0.17 245);
+  --ring: oklch(0.66 0.17 245);
+  --role-accent: oklch(0.7 0.17 245);
+  --role-accent-2: oklch(0.78 0.14 200);
+  --role-glow: oklch(0.62 0.22 240 / 0.45);
+
+  /* Trading terminal: black to deep blue, cyan at the horizon. */
+  --bg-deep: oklch(0.09 0.02 262);
+  --bg-mid: oklch(0.145 0.05 250);
+  --bg-halo: oklch(0.34 0.1 232);
+}
+
+/* Admin: violet + purple. */
+[data-role='admin'] {
+  --role-accent: oklch(0.55 0.21 300);
+  --role-accent-2: oklch(0.6 0.19 285);
+  --role-glow: oklch(0.55 0.24 300 / 0.4);
+}
+.dark[data-role='admin'] {
+  --primary: oklch(0.66 0.21 300);
+  --ring: oklch(0.66 0.21 300);
+  --role-accent: oklch(0.7 0.21 300);
+  --role-accent-2: oklch(0.72 0.19 285);
+  --role-glow: oklch(0.62 0.26 300 / 0.5);
+
+  /* Management console: richer violet, one step above the trader floor. */
+  --bg-deep: oklch(0.095 0.028 300);
+  --bg-mid: oklch(0.16 0.065 300);
+  --bg-halo: oklch(0.36 0.14 300);
+}
+
+/* Super Admin: deep violet + indigo, with a restrained gold highlight. */
+[data-role='super_admin'] {
+  --role-accent: oklch(0.5 0.22 295);
+  --role-accent-2: oklch(0.52 0.19 268);
+  --role-gold: oklch(0.78 0.13 85);
+  --role-glow: oklch(0.52 0.25 292 / 0.42);
+}
+.dark[data-role='super_admin'] {
+  --primary: oklch(0.64 0.22 292);
+  --ring: oklch(0.64 0.22 292);
+  --role-accent: oklch(0.66 0.22 292);
+  --role-accent-2: oklch(0.64 0.19 268);
+  --role-gold: oklch(0.82 0.14 88);
+  --role-glow: oklch(0.58 0.28 292 / 0.5);
+
+  /*
+   * Executive tier: the deepest black of the three, with indigo depth behind
+   * the violet. The gold is a highlight only - it appears on hairlines and
+   * key figures, never as a surface, which is what keeps it from looking
+   * like a gaming theme.
+   */
+  --bg-deep: oklch(0.075 0.024 288);
+  --bg-mid: oklch(0.15 0.07 285);
+  --bg-halo: oklch(0.34 0.15 288);
+  --bg-halo-2: oklch(0.3 0.12 265);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-profit: var(--profit);
+  --color-profit-foreground: var(--profit-foreground);
+  --color-profit-muted: var(--profit-muted);
+  --color-loss: var(--loss);
+  --color-loss-foreground: var(--loss-foreground);
+  --color-loss-muted: var(--loss-muted);
+  --color-neutral: var(--neutral);
+  --color-stale: var(--stale);
+  --color-stale-muted: var(--stale-muted);
+
+  --color-role: var(--role-accent);
+  --color-role-2: var(--role-accent-2);
+  --color-role-gold: var(--role-gold);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ------------------------------------------------------------- animations */
+
+@keyframes smd-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes smd-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes smd-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slow ambient drift for the background orbs. Deliberately long-period so it
+   registers as atmosphere rather than motion. */
+@keyframes smd-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(3%, -4%, 0) scale(1.06);
+  }
+  66% {
+    transform: translate3d(-3%, 3%, 0) scale(0.96);
+  }
+}
+
+@keyframes smd-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Travels a highlight across a gradient border. */
+@keyframes smd-border-sweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes smd-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes smd-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes smd-ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/*
+ * Aurora: the large mesh layers behind every page. Long period, small travel
+ * and no opacity flicker - it should read as light moving in a room, not as
+ * something demanding attention.
+ */
+@keyframes smd-aurora {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(3%, -2%, 0) scale(1.08);
+  }
+  66% {
+    transform: translate3d(-2%, 3%, 0) scale(1.04);
+  }
+}
+
+/* Slow rotation for conic gradient borders and halos. */
+@keyframes smd-spin-slow {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Diagonal reflection travelling across a glass surface. */
+@keyframes smd-sheen {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+/* Pans a large gradient across its own box. */
+@keyframes smd-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: smd-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-fade-in {
+    animation: smd-fade-in 0.5s ease-out both;
+  }
+  .animate-scale-in {
+    animation: smd-scale-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-drift {
+    animation: smd-drift 28s ease-in-out infinite;
+  }
+  .animate-glow-pulse {
+    animation: smd-glow-pulse 6s ease-in-out infinite;
+  }
+  .animate-float {
+    animation: smd-float 6s ease-in-out infinite;
+  }
+  .animate-ticker {
+    animation: smd-ticker 40s linear infinite;
+  }
+  .animate-aurora {
+    animation: smd-aurora 34s ease-in-out infinite;
+    will-change: transform;
+  }
+  .animate-spin-slow {
+    animation: smd-spin-slow 48s linear infinite;
+  }
+  .animate-pan {
+    background-size: 200% 200%;
+    animation: smd-pan 18s ease-in-out infinite;
+  }
+
+  /* Staggering helpers, so a group of cards enters in sequence. */
+  .delay-1 {
+    animation-delay: 80ms;
+  }
+  .delay-2 {
+    animation-delay: 160ms;
+  }
+  .delay-3 {
+    animation-delay: 240ms;
+  }
+  .delay-4 {
+    animation-delay: 320ms;
+  }
+  .delay-5 {
+    animation-delay: 400ms;
+  }
+  .delay-6 {
+    animation-delay: 480ms;
+  }
+
+  /* Glassmorphism surface. */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .glass-strong {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    box-shadow:
+      0 1px 0 0 var(--glass-highlight) inset,
+      0 24px 60px -24px oklch(0 0 0 / 0.6);
+  }
+
+  /* Soft accent glow behind a surface. */
+  .glow-role {
+    box-shadow: 0 0 0 1px var(--glass-border), 0 18px 60px -22px var(--role-glow);
+  }
+
+  /* Animated gradient border, drawn with a masked pseudo-element so it does
+     not affect layout or the element's own background. */
+  .border-sweep {
+    position: relative;
+  }
+  .border-sweep::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        110deg,
+        transparent 20%,
+        var(--role-accent) 45%,
+        var(--role-accent-2) 55%,
+        transparent 80%
+      )
+      0% 50% / 200% 100%;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .border-sweep:hover::before,
+  .border-sweep:focus-within::before {
+    opacity: 1;
+    animation: smd-border-sweep 2.4s linear infinite;
+  }
+
+  /* Card lift on hover. */
+  .lift {
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.28s ease,
+      border-color 0.28s ease;
+  }
+  .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 44px -24px var(--role-glow);
+  }
+
+  /* Text filled with the role gradient. */
+  .text-gradient {
+    background: linear-gradient(120deg, var(--role-accent), var(--role-accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /*
+   * Premium panel. Heavier than .glass: a tinted wash, an inner top highlight
+   * that reads as a bevel, and a deep ambient shadow. Used for the cards that
+   * carry a page rather than every card on it.
+   */
+  .panel {
+    position: relative;
+    background:
+      linear-gradient(180deg, var(--glass-highlight) 0%, transparent 42%),
+      var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    box-shadow:
+      0 1px 0 0 var(--glass-highlight) inset,
+      0 30px 70px -32px oklch(0 0 0 / 0.75);
+  }
+
+  /*
+   * A light reflection that travels across a surface on hover. The sweep lives
+   * in ::after and is clipped by the parent, so it never escapes the card.
+   */
+  .sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .sheen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sheen:hover::after {
+    opacity: 1;
+    animation: smd-sheen 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /*
+   * Always-on animated gradient border, for the few elements that should feel
+   * alive at rest. .border-sweep stays the hover-only version.
+   */
+  .border-live {
+    position: relative;
+  }
+  .border-live::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        110deg,
+        transparent 15%,
+        var(--role-accent) 38%,
+        var(--role-accent-2) 52%,
+        transparent 80%
+      )
+      0% 50% / 200% 100%;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.55;
+    pointer-events: none;
+    animation: smd-border-sweep 6s linear infinite;
+  }
+
+  /*
+   * Super Admin's gold hairline. A single top edge, nothing more - gold reads
+   * as executive at this dose and as costume jewellery at any more.
+   */
+  .edge-gold {
+    position: relative;
+  }
+  .edge-gold::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      transparent 8%,
+      var(--role-gold) 50%,
+      transparent 92%
+    );
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Text filled with the restrained gold, for headline figures only. */
+  .text-gold {
+    background: linear-gradient(120deg, var(--role-gold), var(--role-accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Nothing in this app should scroll sideways. */
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /*
+   * Theme cross-fade.
+   *
+   * Flipping the `dark` class swaps every token at once, which snaps harshly.
+   * Transitioning the handful of properties that actually carry the theme -
+   * colour, background and border - smooths the change without animating
+   * layout. Scoped to elements that declare a background or border so it does
+   * not attach a transition to every node on the page.
+   *
+   * Deliberately NOT applied to transform or opacity: those belong to the
+   * component animations and would be slowed down by a global rule.
+   */
+  body,
+  header,
+  aside,
+  main,
+  footer,
+  section,
+  nav,
+  button,
+  input,
+  textarea,
+  select,
+  [class*='bg-'],
+  [class*='border'],
+  [class*='glass'],
+  [class*='panel'] {
+    transition:
+      background-color 0.35s ease,
+      border-color 0.35s ease,
+      color 0.35s ease;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar styled to match the surface rather than the OS default. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted-foreground);
+    background-clip: content-box;
+  }
+
+  /*
+   * Honour the OS setting rather than animating regardless. Ambient background
+   * motion is decorative, so it stops entirely; functional transitions are
+   * merely shortened so interfaces still feel responsive.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .animate-drift,
+    .animate-glow-pulse,
+    .animate-float,
+    .animate-ticker,
+    .animate-aurora,
+    .animate-spin-slow,
+    .animate-pan,
+    .border-live::before,
+    .sheen:hover::after {
+      animation: none !important;
+    }
+
+    /* The sweep would otherwise sit frozen mid-travel across the card. */
+    .sheen::after {
+      display: none !important;
+    }
+  }
+}

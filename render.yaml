@@ -1,0 +1,49 @@
+# Render Blueprint for the API service.
+#
+# Render > New > Blueprint, point it at this repository. Secrets are marked
+# `sync: false`, which means Render prompts for them instead of storing them in
+# this file - nothing sensitive belongs in version control.
+services:
+  - type: web
+    name: smd-api
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+
+    # Build from the repo root so npm workspaces resolve, and build the shared
+    # contracts before the server that imports them.
+    buildCommand: npm ci && npm run build:shared && npm run build --workspace @smd/server
+    startCommand: npm run start --workspace @smd/server
+
+    # Render polls this path; a failing probe blocks the deploy from going live.
+    # /health is liveness only - deliberately not /ready, which reports 503 when
+    # Atlas is briefly unreachable and would otherwise fail an healthy deploy.
+    healthCheckPath: /api/v1/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '22'
+      - key: LOG_LEVEL
+        value: info
+      # Render terminates TLS at its proxy; without this, every client IP would
+      # read as the proxy's and rate limiting would key on a single address.
+      - key: TRUST_PROXY
+        value: '1'
+      - key: MONGODB_DB_NAME
+        value: stock_market_dashboard
+      - key: MONGODB_URI
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: REDIS_URL
+        sync: false
+# ---------------------------------------------------------------------------
+# Free-tier caveat, carried forward from the M0 risk register (R2):
+# a free Render service sleeps after ~15 minutes of inactivity. While asleep no
+# cron work runs, which will stall the limit-order matcher (M4) and the alert
+# evaluator (M6), and the next request pays a ~50s cold start. The Starter plan
+# removes both. See DEPLOYMENT.md.
+# ---------------------------------------------------------------------------
