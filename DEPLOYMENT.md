@@ -171,7 +171,7 @@ Passing looks like:
 | `CORS_ORIGINS`                                            | **yes**  | Your Vercel origins, comma-separated                    |
 | `APP_URL`                                                 | **yes**  | Your Vercel URL, used to build email links              |
 | `COOKIE_SAMESITE`                                         | no       | `lax` (correct with the proxy)                          |
-| `DEMO_PASSWORD`                                           | no       | Defaults to `Demo@12345`                                |
+| `DEMO_PASSWORD`                                           | no       | Defaults to `Tr@derDemo#82Lm!5`                                |
 | `REDIS_URL`                                               | no       | Upstash `rediss://…`; omit to use the in-process cache  |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | no       | Omit and links are returned in the API response instead |
 | `MAIL_FROM`                                               | no       | Sender identity                                         |

@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { EXCHANGES, MARKET_TO_CURRENCY, EXCHANGE_TO_MARKET, toMinor, type Role } from '@smd/shared';
-import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 import { connectDatabase, disconnectDatabase } from '../config/db.js';
 import { User } from '../modules/users/user.model.js';
@@ -11,7 +10,11 @@ import { ensureRolesSeeded } from '../modules/roles/role.service.js';
 import { ensureWallets } from '../modules/portfolios/portfolio.service.js';
 import { getSystemConfig } from '../modules/admin/config.service.js';
 import { hashPassword } from '../lib/password.js';
-import { DEMO_ACCOUNTS } from '../modules/auth/auth.service.js';
+import {
+  DEMO_ACCOUNTS,
+  listDemoAccounts,
+  resolveDemoPassword,
+} from '../modules/auth/auth.service.js';
 import { seedDemoContent } from './demoData.js';
 import { seedDemoTrading } from './demoTrading.js';
 import { INSTRUMENT_SEED, toProviderSymbol } from './instruments.data.js';
@@ -93,24 +96,70 @@ interface DemoSeed {
   lastName: string;
 }
 
-const DEMO_PROFILES: DemoSeed[] = [
-  { role: 'user', email: 'demo.user@smd.local', firstName: 'Demo', lastName: 'User' },
-  { role: 'trader', email: 'demo.trader@smd.local', firstName: 'Demo', lastName: 'Trader' },
-  { role: 'admin', email: 'demo.admin@smd.local', firstName: 'Demo', lastName: 'Admin' },
+/*
+ * `previousEmail` exists so an existing deployment is MIGRATED rather than
+ * duplicated. The demo accounts already own portfolios, holdings, orders and
+ * watchlists, all keyed by userId - creating fresh accounts under the new
+ * addresses would strand every one of those records against an orphaned user.
+ */
+const DEMO_PROFILES: (DemoSeed & { previousEmail?: string })[] = [
+  {
+    role: 'user',
+    email: 'user.demo@stockdashboard.com',
+    previousEmail: 'demo.user@smd.local',
+    firstName: 'Demo',
+    lastName: 'User',
+  },
+  {
+    role: 'trader',
+    email: 'trader.demo@stockdashboard.com',
+    previousEmail: 'demo.trader@smd.local',
+    firstName: 'Demo',
+    lastName: 'Trader',
+  },
+  {
+    role: 'admin',
+    email: 'admin.demo@stockdashboard.com',
+    previousEmail: 'demo.admin@smd.local',
+    firstName: 'Demo',
+    lastName: 'Admin',
+  },
   {
     role: 'super_admin',
-    email: 'demo.superadmin@smd.local',
+    email: 'superadmin.demo@stockdashboard.com',
+    previousEmail: 'demo.superadmin@smd.local',
     firstName: 'Demo',
     lastName: 'SuperAdmin',
   },
 ];
 
 async function seedDemoAccounts(): Promise<mongoose.Types.ObjectId[]> {
-  const passwordHash = await hashPassword(env.DEMO_PASSWORD);
   const ids: mongoose.Types.ObjectId[] = [];
 
   for (const profile of DEMO_PROFILES) {
-    // The password is reset on every seed so a rotated DEMO_PASSWORD takes
+    /*
+     * Migrate an account that still carries the previous address. Renaming
+     * keeps the same _id, so every portfolio, holding, order, transaction,
+     * watchlist and alert that references this user survives untouched.
+     */
+    if (profile.previousEmail) {
+      const stale = await User.findOne({ email: profile.previousEmail });
+      if (stale && !(await User.findOne({ email: profile.email }))) {
+        stale.email = profile.email;
+        await stale.save();
+        logger.info(
+          { from: profile.previousEmail, to: profile.email },
+          '  demo account migrated to its new address',
+        );
+      }
+    }
+
+    // Each account has its own password now, so the hash is per account.
+    const account = DEMO_ACCOUNTS.find((entry) => entry.role === profile.role);
+    if (!account) continue;
+    const passwordHash = await hashPassword(resolveDemoPassword(account));
+
+    // The password is reset on every seed so a rotated credential takes
     // effect, and demo accounts are pre-verified so a reviewer is never
     // blocked behind an email they cannot receive.
     const user = await User.findOneAndUpdate(
@@ -190,8 +239,8 @@ export async function runSeed(): Promise<void> {
    * ordered by privilege and has gained a role before, which silently shifted
    * every index and mis-assigned the education author.
    */
-  const adminDoc = await User.findOne({ email: 'demo.admin@smd.local' }).lean();
-  const traderDoc = await User.findOne({ email: 'demo.trader@smd.local' }).lean();
+  const adminDoc = await User.findOne({ email: 'admin.demo@stockdashboard.com' }).lean();
+  const traderDoc = await User.findOne({ email: 'trader.demo@stockdashboard.com' }).lean();
 
   const educationCount = await seedEducation(adminDoc?._id ?? null);
   logger.info({ educationCount }, '  education articles ready');
@@ -204,7 +253,7 @@ export async function runSeed(): Promise<void> {
 
   logger.info('Seed complete.');
   logger.info(
-    { accounts: DEMO_ACCOUNTS.map((a) => a.email), password: env.DEMO_PASSWORD },
+    { accounts: listDemoAccounts().map((a) => `${a.email} / ${a.password}`) },
     'Demo credentials',
   );
 }

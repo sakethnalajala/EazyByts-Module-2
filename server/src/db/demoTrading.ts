@@ -571,14 +571,14 @@ async function runFor(email: string, legs: Leg[], open: RestingOrder[], tag: str
 }
 
 export async function seedDemoTrading(): Promise<void> {
-  await runFor('demo.trader@smd.local', TRADER_LEGS, TRADER_OPEN, 'trader');
-  await runFor('demo.admin@smd.local', ADMIN_LEGS, ADMIN_OPEN, 'admin');
-  await runFor('demo.superadmin@smd.local', SUPER_LEGS, SUPER_OPEN, 'superadmin');
+  await runFor('trader.demo@stockdashboard.com', TRADER_LEGS, TRADER_OPEN, 'trader');
+  await runFor('admin.demo@stockdashboard.com', ADMIN_LEGS, ADMIN_OPEN, 'admin');
+  await runFor('superadmin.demo@stockdashboard.com', SUPER_LEGS, SUPER_OPEN, 'superadmin');
 
   for (const email of [
-    'demo.trader@smd.local',
-    'demo.admin@smd.local',
-    'demo.superadmin@smd.local',
+    'trader.demo@stockdashboard.com',
+    'admin.demo@stockdashboard.com',
+    'superadmin.demo@stockdashboard.com',
   ]) {
     const user = await User.findOne({ email }).lean();
     if (!user) continue;
@@ -592,7 +592,7 @@ export async function seedDemoTrading(): Promise<void> {
    * NOT the order or alert ones - it cannot trade, so a feed full of fills
    * would be fiction. No alerts either, for the same reason.
    */
-  const viewer = await User.findOne({ email: 'demo.user@smd.local' }).lean();
+  const viewer = await User.findOne({ email: 'user.demo@stockdashboard.com' }).lean();
   if (viewer) {
     const notes = await seedNotifications(
       viewer._id,

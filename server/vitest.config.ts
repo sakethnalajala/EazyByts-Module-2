@@ -21,7 +21,8 @@ export default defineConfig({
       PORT: '5099',
       TRUST_PROXY: '0',
       APP_URL: 'http://localhost:5173',
-      DEMO_PASSWORD: 'Demo@12345',
+      // DEMO_PASSWORD deliberately unset: it is a global override, and setting
+      // it here would mask the per-account passwords the tests need to verify.
       // Workers would fight the test database; they get their own tests.
       ENABLE_WORKERS: 'false',
       // Deterministic market data, so no test depends on a live provider.

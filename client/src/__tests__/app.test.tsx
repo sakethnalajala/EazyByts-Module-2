@@ -109,22 +109,22 @@ function stubEndpoints(): void {
           {
             role: 'trader',
             label: 'Trader',
-            email: 'demo.trader@smd.local',
-            password: 'Demo@12345',
+            email: 'trader.demo@stockdashboard.com',
+            password: 'Tr@derDemo#82Lm!5',
             description: 'Full trading experience.',
           },
           {
             role: 'admin',
             label: 'Admin',
-            email: 'demo.admin@smd.local',
-            password: 'Demo@12345',
+            email: 'admin.demo@stockdashboard.com',
+            password: 'Tr@derDemo#82Lm!5',
             description: 'User management and trade monitoring.',
           },
           {
             role: 'super_admin',
             label: 'Super Admin',
-            email: 'demo.superadmin@smd.local',
-            password: 'Demo@12345',
+            email: 'superadmin.demo@stockdashboard.com',
+            password: 'Tr@derDemo#82Lm!5',
             description: 'Full platform control.',
           },
         ],
@@ -344,7 +344,7 @@ describe('role selection', () => {
       expect(screen.getByRole('button', { name: /fill credentials/i })).toBeInTheDocument();
     });
     expect(screen.getByRole('button', { name: /use demo account/i })).toBeInTheDocument();
-    expect(screen.getByText('demo.admin@smd.local')).toBeInTheDocument();
+    expect(screen.getByText('admin.demo@stockdashboard.com')).toBeInTheDocument();
   });
 
   it('fills the real form from the documented demo credentials', async () => {
@@ -359,9 +359,9 @@ describe('role selection', () => {
     await user.click(screen.getByRole('button', { name: /fill credentials/i }));
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Email')).toHaveValue('demo.trader@smd.local');
+      expect(screen.getByLabelText('Email')).toHaveValue('trader.demo@stockdashboard.com');
     });
-    expect(screen.getByLabelText('Password')).toHaveValue('Demo@12345');
+    expect(screen.getByLabelText('Password')).toHaveValue('Tr@derDemo#82Lm!5');
   });
 
   it('ignores an unknown role and falls back to the plain sign-in', async () => {

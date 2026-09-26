@@ -112,8 +112,13 @@ const envSchema = z
     ORDER_MATCHER_INTERVAL_SECONDS: z.coerce.number().int().min(10).max(3600).default(30),
     ALERT_EVALUATOR_INTERVAL_SECONDS: z.coerce.number().int().min(10).max(3600).default(60),
 
-    /** Seed password for the demo accounts. Documented, not secret. */
-    DEMO_PASSWORD: z.string().min(8).default('Demo@12345'),
+    /**
+     * OPTIONAL global override for every demo account password.
+     *
+     * Unset - the normal case - each demo account uses its own password from
+     * DEMO_ACCOUNTS. Set it to lock a public deploy behind one rotated value.
+     */
+    DEMO_PASSWORD: z.string().min(8).optional(),
   })
   .superRefine((value, ctx) => {
     if (value.NODE_ENV !== 'production') return;

@@ -9,10 +9,10 @@ const app = createApp();
 
 /** Mirrors the four seeded demo accounts. */
 const DEMO_EMAILS: Record<Role, string> = {
-  user: 'demo.user@smd.local',
-  trader: 'demo.trader@smd.local',
-  admin: 'demo.admin@smd.local',
-  super_admin: 'demo.superadmin@smd.local',
+  user: 'user.demo@stockdashboard.com',
+  trader: 'trader.demo@stockdashboard.com',
+  admin: 'admin.demo@stockdashboard.com',
+  super_admin: 'superadmin.demo@stockdashboard.com',
 };
 
 async function seedDemoAccounts(): Promise<void> {
@@ -210,7 +210,7 @@ describe('PATCH /api/v1/users/preferences', () => {
 
   it('allows demo accounts to customise their own view', async () => {
     const { accessToken } = await createAuthedUser(app, {
-      email: 'demo.trader@smd.local',
+      email: 'trader.demo@stockdashboard.com',
       isDemo: true,
     });
 
@@ -225,7 +225,7 @@ describe('PATCH /api/v1/users/preferences', () => {
 
   it('blocks demo accounts from editing the shared profile', async () => {
     const { accessToken } = await createAuthedUser(app, {
-      email: 'demo.trader@smd.local',
+      email: 'trader.demo@stockdashboard.com',
       isDemo: true,
     });
 

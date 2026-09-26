@@ -298,39 +298,72 @@ export async function login(input: LoginInput, context: RequestContext): Promise
 
 // ----------------------------------------------------------------- demo login
 
-export const DEMO_ACCOUNTS: readonly Omit<DemoAccountInfo, 'password'>[] = [
+/**
+ * The four public demo accounts.
+ *
+ * Each carries its OWN password. They are documented publicly and shown on
+ * the sign-in screen by design - these are throwaway accounts on a simulated
+ * platform, not credentials worth protecting. They are still stored only as
+ * argon2id hashes; nothing here is written to the database in plaintext.
+ *
+ * This list is the single source of truth. The seed hashes from it and the
+ * sign-in screen displays from it, through `resolveDemoPassword` below, so
+ * the credential shown can never drift from the one that actually works.
+ */
+export const DEMO_ACCOUNTS: readonly DemoAccountInfo[] = [
   {
     role: 'user',
     label: ROLE_LABELS.user,
-    email: 'demo.user@smd.local',
+    email: 'user.demo@stockdashboard.com',
+    password: 'U$erDemo#47Xq!9',
     description:
       'View-only account: explore the market, follow a watchlist, read news and work through the education library. No trading.',
   },
   {
     role: 'trader',
     label: ROLE_LABELS.trader,
-    email: 'demo.trader@smd.local',
+    email: 'trader.demo@stockdashboard.com',
+    password: 'Tr@derDemo#82Lm!5',
     description:
       'Full trading experience: place orders, manage a portfolio, build watchlists and set alerts.',
   },
   {
     role: 'admin',
     label: ROLE_LABELS.admin,
-    email: 'demo.admin@smd.local',
+    email: 'admin.demo@stockdashboard.com',
+    password: 'Adm!nDemo#63Vk@8',
     description:
       'Everything a trader can do, plus user management, trade monitoring and content administration.',
   },
   {
     role: 'super_admin',
     label: ROLE_LABELS.super_admin,
-    email: 'demo.superadmin@smd.local',
+    email: 'superadmin.demo@stockdashboard.com',
+    password: 'Sup3rAdm!n#91Zp@6',
     description:
       'Full platform control: manage admins, edit role permissions, configure the platform and monitor system health.',
   },
 ];
 
+/**
+ * The password a given demo account actually uses.
+ *
+ * `DEMO_PASSWORD` remains supported as a GLOBAL override, so a public deploy
+ * can lock every demo account behind one rotated secret without a code
+ * change. Unset - the normal case - each account keeps its own password.
+ *
+ * Both the seed and the sign-in screen call this, which is what stops the
+ * displayed credential drifting from the stored hash.
+ */
+export function resolveDemoPassword(account: Pick<DemoAccountInfo, 'password'>): string {
+  return env.DEMO_PASSWORD ?? account.password;
+}
+
 export function listDemoAccounts(): DemoAccountInfo[] {
-  return DEMO_ACCOUNTS.map((account) => ({ ...account, password: env.DEMO_PASSWORD }));
+  return DEMO_ACCOUNTS.map((account) => ({
+    ...account,
+    password: resolveDemoPassword(account),
+  }));
 }
 
 /**

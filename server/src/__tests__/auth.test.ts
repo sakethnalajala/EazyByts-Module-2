@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
+import { listDemoAccounts } from '../modules/auth/auth.service.js';
 import { ERROR_CODES } from '@smd/shared';
 import { createApp } from '../app.js';
 import { User } from '../modules/users/user.model.js';
@@ -482,10 +483,10 @@ describe('password reset', () => {
   });
 
   it('will not issue a reset for a demo account', async () => {
-    await createUser({ email: 'demo.trader@smd.local', isDemo: true });
+    await createUser({ email: 'trader.demo@stockdashboard.com', isDemo: true });
     const res = await request(app)
       .post('/api/v1/auth/forgot-password')
-      .send({ email: 'demo.trader@smd.local' });
+      .send({ email: 'trader.demo@stockdashboard.com' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.url).toBeUndefined();
@@ -525,7 +526,7 @@ describe('POST /api/v1/auth/change-password', () => {
 
   it('blocks demo accounts from changing shared credentials', async () => {
     const { accessToken } = await createAuthedUser(app, {
-      email: 'demo.trader@smd.local',
+      email: 'trader.demo@stockdashboard.com',
       isDemo: true,
     });
 
@@ -536,5 +537,54 @@ describe('POST /api/v1/auth/change-password', () => {
 
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe(ERROR_CODES.DEMO_ACCOUNT_RESTRICTED);
+  });
+});
+
+// ------------------------------------------------------- demo credentials
+
+describe('demo account credentials', () => {
+  it('gives every role its own distinct, strong password', () => {
+    const accounts = listDemoAccounts();
+
+    expect(accounts).toHaveLength(4);
+    expect(new Set(accounts.map((a) => a.password)).size).toBe(4);
+    expect(new Set(accounts.map((a) => a.email)).size).toBe(4);
+
+    for (const account of accounts) {
+      // Long, mixed-case, with a digit and a symbol.
+      expect(account.password.length).toBeGreaterThanOrEqual(12);
+      expect(account.password).toMatch(/[a-z]/);
+      expect(account.password).toMatch(/[A-Z]/);
+      expect(account.password).toMatch(/[0-9]/);
+      expect(account.password).toMatch(/[^A-Za-z0-9]/);
+      expect(account.email).toMatch(/@stockdashboard\.com$/);
+    }
+  });
+
+  it('pins each role to its documented credential', () => {
+    const byRole = Object.fromEntries(listDemoAccounts().map((a) => [a.role, a]));
+
+    expect(byRole.user).toMatchObject({
+      email: 'user.demo@stockdashboard.com',
+      password: 'U$erDemo#47Xq!9',
+    });
+    expect(byRole.trader).toMatchObject({
+      email: 'trader.demo@stockdashboard.com',
+      password: 'Tr@derDemo#82Lm!5',
+    });
+    expect(byRole.admin).toMatchObject({
+      email: 'admin.demo@stockdashboard.com',
+      password: 'Adm!nDemo#63Vk@8',
+    });
+    expect(byRole.super_admin).toMatchObject({
+      email: 'superadmin.demo@stockdashboard.com',
+      password: 'Sup3rAdm!n#91Zp@6',
+    });
+  });
+
+  it('retains no trace of the retired credentials', () => {
+    const blob = JSON.stringify(listDemoAccounts());
+    expect(blob).not.toContain('Demo@12345');
+    expect(blob).not.toContain('smd.local');
   });
 });

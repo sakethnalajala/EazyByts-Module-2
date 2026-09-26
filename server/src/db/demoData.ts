@@ -169,7 +169,8 @@ const EXTRA_USERS: ExtraUserSeed[] = [
 ];
 
 async function seedExtraUsers(): Promise<number> {
-  const passwordHash = await hashPassword(env.DEMO_PASSWORD);
+  // Supporting cast, not sign-in accounts: one shared throwaway password.
+  const passwordHash = await hashPassword(env.DEMO_PASSWORD ?? 'Demo$Fixture#2026');
   const ids: mongoose.Types.ObjectId[] = [];
 
   for (const [index, profile] of EXTRA_USERS.entries()) {
@@ -222,7 +223,7 @@ const AUDIT_ENTRIES: AuditSeed[] = [
 ];
 
 async function seedAuditLogs(): Promise<number> {
-  const actor = await User.findOne({ email: 'demo.superadmin@smd.local' }).lean();
+  const actor = await User.findOne({ email: 'superadmin.demo@stockdashboard.com' }).lean();
 
   for (const [index, entry] of AUDIT_ENTRIES.entries()) {
     const createdAt = new Date(Date.now() - entry.ageHours * 3_600_000);
@@ -240,7 +241,7 @@ async function seedAuditLogs(): Promise<number> {
       {
         $setOnInsert: {
           actorId: actor?._id ?? null,
-          actorEmail: actor?.email ?? 'demo.superadmin@smd.local',
+          actorEmail: actor?.email ?? 'superadmin.demo@stockdashboard.com',
           actorRole: 'super_admin',
           action: entry.action,
           targetType: entry.targetType,
@@ -330,14 +331,14 @@ export async function seedDemoContent(): Promise<void> {
   const auditCount = await seedAuditLogs();
   logger.info({ auditLogs: auditCount }, '  demo audit log ready');
 
-  const demoUser = await User.findOne({ email: 'demo.user@smd.local' }).lean();
+  const demoUser = await User.findOne({ email: 'user.demo@stockdashboard.com' }).lean();
   if (demoUser) {
     await seedWatchlistFor(demoUser._id, ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'AXISBANK']);
     await seedNotificationsFor(demoUser._id);
     logger.info('  demo user watchlist and notifications ready');
   }
 
-  for (const email of ['demo.admin@smd.local', 'demo.superadmin@smd.local']) {
+  for (const email of ['admin.demo@stockdashboard.com', 'superadmin.demo@stockdashboard.com']) {
     const account = await User.findOne({ email }).lean();
     if (account) await seedNotificationsFor(account._id);
   }

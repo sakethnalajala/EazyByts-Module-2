@@ -155,7 +155,7 @@ describe('admin user management', () => {
   });
 
   it('refuses to suspend a shared demo account', async () => {
-    const demo = await createUser({ email: 'demo.trader@smd.local', isDemo: true });
+    const demo = await createUser({ email: 'trader.demo@stockdashboard.com', isDemo: true });
     const res = await admin.auth(
       request(app).patch(`/api/v1/admin/users/${demo.id}/status`).send({ status: 'suspended' }),
     );

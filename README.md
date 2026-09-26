@@ -136,9 +136,9 @@ screen with one click — no password typing required.
 
 | Role        | Email                       | Password     |
 | ----------- | --------------------------- | ------------ |
-| Trader      | `demo.trader@smd.local`     | `Demo@12345` |
-| Admin       | `demo.admin@smd.local`      | `Demo@12345` |
-| Super Admin | `demo.superadmin@smd.local` | `Demo@12345` |
+| Trader      | `trader.demo@stockdashboard.com`     | `Tr@derDemo#82Lm!5` |
+| Admin       | `admin.demo@stockdashboard.com`      | `Tr@derDemo#82Lm!5` |
+| Super Admin | `superadmin.demo@stockdashboard.com` | `Tr@derDemo#82Lm!5` |
 
 Demo accounts cannot change their own password or profile, so the shared demo
 keeps working for everyone. Change `DEMO_PASSWORD` in `server/.env` and re-seed
