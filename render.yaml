@@ -13,7 +13,20 @@ services:
 
     # Build from the repo root so npm workspaces resolve, and build the shared
     # contracts before the server that imports them.
-    buildCommand: npm ci && npm run build:shared && npm run build --workspace @smd/server
+    #
+    # `--include=dev` is load-bearing. NODE_ENV=production is set below, and
+    # npm honours it during install by setting omit=dev - which strips
+    # TypeScript (a root devDependency). Without this flag `tsc` is missing,
+    # nothing is emitted, and the service dies at startup on
+    # "Cannot find module .../server/dist/index.js".
+    #
+    # The final `test -f` turns a silent build failure into a failed deploy,
+    # so a broken build can never reach the start command.
+    buildCommand: >-
+      npm ci --include=dev &&
+      npm run build:shared &&
+      npm run build:server &&
+      test -f server/dist/index.js
     startCommand: npm run start --workspace @smd/server
 
     # Render polls this path; a failing probe blocks the deploy from going live.
